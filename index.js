@@ -75,19 +75,49 @@ async function run() {
             const buying = req.body;
             console.log(buying);
             const query = {
-                orderDate: buying.orderDate,
+                // orderStartDate: buying.orderStartDate,
                 email: buying.email,
             }
 
             const alreadyBuyed = await buyingsCollection.find(query).toArray();
+            console.log(alreadyBuyed);
+            if (alreadyBuyed.length > 0) {
+                let alreadyBooked = 0;
+                const found = alreadyBuyed.map(order => {
+                    const startDate = new Date(order.orderStartDate);
+                    const endDate = new Date(order.orderEndDate);
 
-            if (alreadyBuyed.length) {
-                // result = addDays(buying.orderDate, 10);
-                const message = `you already buy this package on ${buying.orderDate}`
-                return res.send({ acknowledged: false, message })
+                    const newDate = new Date(buying.orderStartDate);
+                    const newDate2 = new Date(buying.orderEndDate);
+
+                    if (startDate < newDate && endDate < newDate) {
+                        console.log('Can buy 1 ');
+                    }
+                    else if (startDate > newDate && endDate > newDate) {
+                        if (startDate > newDate2) {
+                            console.log('Can buy 2');
+                        }
+                    }
+                    else {
+                        alreadyBooked = 1;
+                        console.log('cannot buy');
+                    }
+                })
+                console.log(alreadyBooked);
+                if (alreadyBooked === 0) {
+                    const result = await buyingsCollection.insertOne(buying);
+                    return res.send(result);
+                }
+                else {
+                    const message = `you already buy this package on ${buying.orderStartDate}`
+                    return res.send({ acknowledged: false, message })
+                }
             }
-            const result = await buyingsCollection.insertOne(buying);
-            res.send(result);
+            else {
+                const result = await buyingsCollection.insertOne(buying);
+                return res.send(result);
+            }
+
         });
 
         //buyers orders
