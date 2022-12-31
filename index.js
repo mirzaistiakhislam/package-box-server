@@ -45,21 +45,21 @@ async function run() {
 
         app.get('/orderOptions', async (req, res) => {
             //
-            const date = req.query.date;
-            console.log(date);
+            // const date = req.query.date;
+            // console.log(date);
             //
             const query = {};
             const options = await orderOptionsCollection.find(query).toArray();
             //
-            const buyingQuery = { orderDate: date }
-            const alreadyBuyed = await buyingsCollection.find(buyingQuery).toArray();
-            options.forEach(option => {
-                const optionBuyed = alreadyBuyed.filter(buy => buy.pack === option.name);
-                const buyedSlots = optionBuyed.map(buy => buy.slot);
-                const remainingSlots = option.slots.filter(slot => !buyedSlots.includes(slot));
-                option.slots = remainingSlots;
-                // console.log(date, option.name, buyedSlots);
-            })
+            // const buyingQuery = { orderDate: date }
+            // const alreadyBuyed = await buyingsCollection.find(buyingQuery).toArray();
+            // options.forEach(option => {
+            //     const optionBuyed = alreadyBuyed.filter(buy => buy.pack === option.name);
+            //     const buyedSlots = optionBuyed.map(buy => buy.slot);
+            //     const remainingSlots = option.slots.filter(slot => !buyedSlots.includes(slot));
+            //     option.slots = remainingSlots;
+            //     // console.log(date, option.name, buyedSlots);
+            // })
             //
             res.send(options);
         });
@@ -192,6 +192,29 @@ async function run() {
             res.send({ isAdmin: user?.role === 'admin' });
         })
 
+        //add package part
+
+        app.get('/orderPackage', async (req, res) => {
+            const query = {}
+            const result = await orderOptionsCollection.find(query).project({ name: 1, slots: 3 }).toArray();
+            res.send(result);
+        })
+
+        //client to backend
+        app.post('/orderOptions', async (req, res) => {
+            const package = req.body;
+            const result = await orderOptionsCollection.insertOne(package);
+            res.send(result);
+        });
+
+        //delete packages
+
+        app.delete('/orderOptions/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await orderOptionsCollection.deleteOne(filter);
+            res.send(result);
+        })
 
     }
     finally {
