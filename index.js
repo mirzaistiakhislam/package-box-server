@@ -214,6 +214,22 @@ async function run() {
             const filter = { _id: ObjectId(id) };
             const result = await orderOptionsCollection.deleteOne(filter);
             res.send(result);
+        });
+
+        //delete users
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        //payment
+        app.get('/buyings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const buying = await buyingsCollection.findOne(query);
+            res.send(buying);
         })
 
     }
